@@ -16,23 +16,38 @@ RUN apt-get update && apt-get install -y \
 # Set working directory
 WORKDIR /app
 
-# Copy entire project
-COPY . .
+# Copy package files first for better caching
+COPY dashboard/package*.json dashboard/
+COPY dashboard/.npmrc dashboard/
 
 # Install Node.js dependencies
 WORKDIR /app/dashboard
-RUN npm ci
+RUN npm ci --prefer-offline --no-audit
+
+# Copy dashboard source
+WORKDIR /app
+COPY dashboard/ dashboard/
 
 # Build Next.js app
+WORKDIR /app/dashboard
 RUN npm run build
 
 # Remove dev dependencies after build
 RUN npm prune --production
 
-# Install Python dependencies
+# Copy Python requirements
 WORKDIR /app
+COPY backend/requirements.txt backend/
+COPY blockchain/requirements.txt blockchain/
+
+# Install Python dependencies
 RUN pip3 install --no-cache-dir -r backend/requirements.txt
 RUN pip3 install --no-cache-dir -r blockchain/requirements.txt
+
+# Copy rest of the application
+COPY backend/ backend/
+COPY blockchain/ blockchain/
+COPY start.sh .
 
 # Make start script executable
 RUN chmod +x start.sh

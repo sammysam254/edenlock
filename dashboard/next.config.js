@@ -4,13 +4,21 @@ const path = require('path')
 const nextConfig = {
   reactStrictMode: true,
   swcMinify: true,
-  webpack: (config) => {
+  webpack: (config, { isServer }) => {
     config.resolve.alias = {
       ...config.resolve.alias,
       '@': path.resolve(__dirname),
     }
+    
+    // Disable webpack cache in production builds
+    if (!isServer) {
+      config.cache = false
+    }
+    
     return config
   },
+  // Output standalone for Docker
+  output: 'standalone',
 }
 
 module.exports = nextConfig
