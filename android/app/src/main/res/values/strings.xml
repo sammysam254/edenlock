@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Eden</string>
+    <string name="device_locked_title">Device Locked</string>
+    <string name="device_locked_message">Payment required to unlock this device</string>
+    <string name="payment_required">Outstanding Balance</string>
+    <string name="send_payment_to">Send payment to:</string>
+    <string name="checking_status">Checking payment status…</string>
+    <string name="refresh_status">Refresh Status</string>
+    <string name="device_protection_active">Device Protection Active</string>
+    <string name="eden_services">Eden Services KE</string>
+</resources>

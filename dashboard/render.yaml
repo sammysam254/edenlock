@@ -1,0 +1,24 @@
+# Render configuration for Eden Dashboard (Next.js)
+# Deploy this as a Web Service
+
+services:
+  - type: web
+    name: eden-dashboard
+    runtime: node
+    region: oregon
+    plan: starter
+    branch: main
+    rootDir: dashboard
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: NEXT_PUBLIC_SUPABASE_URL
+        sync: false
+      - key: NEXT_PUBLIC_SUPABASE_ANON_KEY
+        sync: false
+      - key: PORT
+        value: 3000
+    healthCheckPath: /
+    autoDeploy: true

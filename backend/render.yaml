@@ -1,0 +1,50 @@
+# Render configuration for Eden Backend Listeners
+# Deploy these as Background Workers
+
+services:
+  # Blockchain Listener (Custom Eden Blockchain)
+  - type: worker
+    name: eden-blockchain-listener
+    runtime: python
+    region: oregon
+    plan: starter
+    branch: main
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: python eden_blockchain_listener.py
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.0
+      - key: BLOCKCHAIN_URL
+        sync: false
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_SERVICE_KEY
+        sync: false
+    autoDeploy: true
+
+  # Web3 Listener (External Blockchain - Optional)
+  # Uncomment if using Polygon/BSC/Ethereum
+  # - type: worker
+  #   name: eden-web3-listener
+  #   runtime: python
+  #   region: oregon
+  #   plan: starter
+  #   branch: main
+  #   rootDir: backend
+  #   buildCommand: pip install -r requirements.txt && pip install web3==6.15.1
+  #   startCommand: python web3_listener.py
+  #   envVars:
+  #     - key: PYTHON_VERSION
+  #       value: 3.11.0
+  #     - key: RPC_URL
+  #       sync: false
+  #     - key: CONTRACT_ADDRESS
+  #       sync: false
+  #     - key: CHAIN_ID
+  #       value: 137
+  #     - key: SUPABASE_URL
+  #       sync: false
+  #     - key: SUPABASE_SERVICE_KEY
+  #       sync: false
+  #   autoDeploy: true
