@@ -1,96 +1,35 @@
-# Render Blueprint for Eden M-KOPA Platform
-# This file defines all services for automatic deployment
+# Render Blueprint - Single Web Service Deployment
+# Deploys Dashboard + Blockchain + Listener in ONE service
 
 services:
-  # 1. Next.js Dashboard (Web Service)
   - type: web
-    name: eden-dashboard
-    runtime: node
+    name: eden-platform
+    env: docker
     region: oregon
     plan: starter
-    branch: main
-    buildCommand: cd dashboard && npm install && npm run build
-    startCommand: cd dashboard && npm start
+    dockerfilePath: ./Dockerfile
     envVars:
+      - key: NODE_VERSION
+        value: 18.17.0
+      - key: PYTHON_VERSION
+        value: 3.11.0
       - key: NODE_ENV
         value: production
+      - key: PORT
+        value: 3000
+      - key: BLOCKCHAIN_PORT
+        value: 5000
       - key: NEXT_PUBLIC_SUPABASE_URL
         sync: false
       - key: NEXT_PUBLIC_SUPABASE_ANON_KEY
         sync: false
-      - key: PORT
-        value: 3000
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_SERVICE_KEY
+        sync: false
+      - key: BLOCKCHAIN_URL
+        value: http://localhost:5000
+      - key: SYNC_INTERVAL
+        value: 15
     healthCheckPath: /
     autoDeploy: true
-
-  # 2. Blockchain Server (Web Service)
-  - type: web
-    name: eden-blockchain-server
-    runtime: python
-    region: oregon
-    plan: starter
-    branch: main
-    buildCommand: cd blockchain && pip install -r requirements.txt
-    startCommand: cd blockchain && gunicorn --bind 0.0.0.0:$PORT eden_blockchain_server:app
-    envVars:
-      - key: PYTHON_VERSION
-        value: 3.11.0
-      - key: PORT
-        value: 5000
-      - key: SUPABASE_URL
-        sync: false
-      - key: SUPABASE_SERVICE_KEY
-        sync: false
-    healthCheckPath: /api/info
-    autoDeploy: true
-
-  # 3. Blockchain Listener (Background Worker)
-  - type: worker
-    name: eden-blockchain-listener
-    runtime: python
-    region: oregon
-    plan: starter
-    branch: main
-    buildCommand: cd backend && pip install -r requirements.txt
-    startCommand: cd backend && python eden_blockchain_listener.py
-    envVars:
-      - key: PYTHON_VERSION
-        value: 3.11.0
-      - key: BLOCKCHAIN_URL
-        sync: false
-      - key: SUPABASE_URL
-        sync: false
-      - key: SUPABASE_SERVICE_KEY
-        sync: false
-    autoDeploy: true
-
-  # 4. Web3 Listener (Background Worker) - Optional
-  # Uncomment if using external blockchain (Polygon/BSC)
-  # - type: worker
-  #   name: eden-web3-listener
-  #   runtime: python
-  #   region: oregon
-  #   plan: starter
-  #   branch: main
-  #   buildCommand: cd backend && pip install -r requirements.txt && pip install web3==6.15.1
-  #   startCommand: cd backend && python web3_listener.py
-  #   envVars:
-  #     - key: PYTHON_VERSION
-  #       value: 3.11.0
-  #     - key: RPC_URL
-  #       sync: false
-  #     - key: CONTRACT_ADDRESS
-  #       sync: false
-  #     - key: CHAIN_ID
-  #       value: 137
-  #     - key: SUPABASE_URL
-  #       sync: false
-  #     - key: SUPABASE_SERVICE_KEY
-  #       sync: false
-  #   autoDeploy: true
-
-# Database: Use Supabase (external)
-# No database service needed as we're using Supabase cloud
-
-# Static Site: Android APK hosting (optional)
-# You can add a static site service to host the Android APK

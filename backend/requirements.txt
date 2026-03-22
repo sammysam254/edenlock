@@ -1,6 +1,5 @@
 supabase==2.3.4
 python-dotenv==1.0.1
 requests==2.31.0
-
-# Optional: For external blockchain support
-# web3==6.15.1
+web3==6.15.1
+gunicorn==21.2.0
