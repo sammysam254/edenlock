@@ -1,7 +1,7 @@
 # Multi-stage Dockerfile for Eden Platform
 # Runs Dashboard (Node.js) + Blockchain (Python) + Listener (Python)
 
-FROM node:18-bullseye-slim
+FROM node:20-bullseye-slim
 
 # Install Python and required tools
 RUN apt-get update && apt-get install -y \
@@ -21,10 +21,13 @@ COPY . .
 
 # Install Node.js dependencies
 WORKDIR /app/dashboard
-RUN npm ci --only=production
+RUN npm ci
 
 # Build Next.js app
 RUN npm run build
+
+# Remove dev dependencies after build
+RUN npm prune --production
 
 # Install Python dependencies
 WORKDIR /app

@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import { useState, useEffect, FormEvent } from 'react'
 import { supabase, Administrator } from '@/lib/supabase'
 
 export default function SuperAdminDashboard() {
@@ -35,7 +35,7 @@ export default function SuperAdminDashboard() {
     }
   }
 
-  const createAdministrator = async (e: React.FormEvent<HTMLFormElement>) => {
+  const createAdministrator = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     try {
       // Generate random password

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, FormEvent } from 'react'
 import { supabase } from '@/lib/supabase'
 
 // Types
@@ -30,6 +30,9 @@ interface Device {
   is_locked: boolean
   status: string
   last_payment_date?: string
+  last_payment_amount?: number
+  total_paid?: number
+  days_overdue?: number
   enrolled_at: string
 }
 
@@ -312,7 +315,7 @@ function CustomersSection({ customers, onRefresh }: any) {
     address: ''
   })
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault()
     try {
       const { error } = await supabase
@@ -461,7 +464,7 @@ function DevicesSection({ devices, customers, onRefresh }: any) {
     payment_frequency: 'daily'
   })
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault()
     try {
       const devicePrice = parseFloat(formData.device_price)
@@ -739,7 +742,7 @@ function PaymentsSection({ payments, devices, customers, onRefresh }: any) {
     notes: ''
   })
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault()
     try {
       // Get device to update loan balance
