@@ -1,32 +1,43 @@
 # Multi-stage Dockerfile for Eden Platform
 # Runs Dashboard (Node.js) + Blockchain (Python) + Listener (Python)
 
-FROM node:18-slim AS node-base
+FROM node:18-bullseye-slim
 
-# Install Python
+# Install Python and required tools
 RUN apt-get update && apt-get install -y \
-    python3.11 \
+    python3 \
     python3-pip \
+    python3-dev \
+    build-essential \
+    bash \
+    curl \
     && rm -rf /var/lib/apt/lists/*
 
+# Set working directory
 WORKDIR /app
 
-# Copy all files
-COPY . .
+# Copy package files first for better caching
+COPY dashboard/package*.json ./dashboard/
+COPY backend/requirements.txt ./backend/
+COPY blockchain/requirements.txt ./blockchain/
 
 # Install Node.js dependencies
 WORKDIR /app/dashboard
-RUN npm install
-RUN npm run build
+RUN npm ci --only=production
 
 # Install Python dependencies
-WORKDIR /app/backend
-RUN pip3 install -r requirements.txt
+WORKDIR /app
+RUN pip3 install --no-cache-dir -r backend/requirements.txt
+RUN pip3 install --no-cache-dir -r blockchain/requirements.txt
 
-WORKDIR /app/blockchain
-RUN pip3 install -r requirements.txt
+# Copy application code
+COPY . /app
 
-# Set working directory
+# Build Next.js app
+WORKDIR /app/dashboard
+RUN npm run build
+
+# Set working directory back to root
 WORKDIR /app
 
 # Make start script executable
@@ -35,5 +46,9 @@ RUN chmod +x start.sh
 # Expose ports
 EXPOSE 3000 5000
 
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
+  CMD curl -f http://localhost:3000/ || exit 1
+
 # Start all services
-CMD ["./start.sh"]
+CMD ["bash", "./start.sh"]
