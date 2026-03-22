@@ -13,21 +13,19 @@ RUN apt-get update && apt-get install -y \
 
 WORKDIR /app
 
-# Copy package files first for better caching
-COPY dashboard/package*.json dashboard/
-COPY dashboard/.npmrc dashboard/
-
-# Install ALL dependencies (needed for build)
-WORKDIR /app/dashboard
-RUN npm ci --prefer-offline --no-audit
-
-# Copy dashboard source
-WORKDIR /app
+# Copy ALL dashboard files (simpler and more reliable)
 COPY dashboard/ dashboard/
 
-# Build Next.js app
+# Install dependencies and build
 WORKDIR /app/dashboard
-RUN npm run build
+RUN echo "📦 Installing Node.js dependencies..." && \
+    npm ci && \
+    echo "✅ Dependencies installed" && \
+    echo "📋 Verifying tailwindcss..." && \
+    npm list tailwindcss && \
+    echo "🔨 Building Next.js application..." && \
+    npm run build && \
+    echo "✅ Build completed successfully"
 
 # Copy Python requirements
 WORKDIR /app
@@ -35,8 +33,10 @@ COPY backend/requirements.txt backend/
 COPY blockchain/requirements.txt blockchain/
 
 # Install Python dependencies
-RUN pip3 install --no-cache-dir -r backend/requirements.txt
-RUN pip3 install --no-cache-dir -r blockchain/requirements.txt
+RUN echo "🐍 Installing Python dependencies..." && \
+    pip3 install --no-cache-dir -r backend/requirements.txt && \
+    pip3 install --no-cache-dir -r blockchain/requirements.txt && \
+    echo "✅ Python dependencies installed"
 
 # Copy rest of the application
 COPY backend/ backend/
