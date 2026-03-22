@@ -13,19 +13,22 @@ RUN apt-get update && apt-get install -y \
 
 WORKDIR /app
 
-# Copy ALL dashboard files (simpler and more reliable)
+# Copy dashboard files (node_modules and .next excluded by .dockerignore)
 COPY dashboard/ dashboard/
 
-# Install dependencies and build
+# Install dependencies from scratch
 WORKDIR /app/dashboard
-RUN echo "📦 Installing Node.js dependencies..." && \
-    npm ci && \
-    echo "✅ Dependencies installed" && \
-    echo "📋 Verifying tailwindcss..." && \
-    npm list tailwindcss && \
-    echo "🔨 Building Next.js application..." && \
+RUN echo "📦 Installing dependencies from package-lock.json..." && \
+    npm ci --no-optional && \
+    echo "✅ npm ci completed" && \
+    echo "📋 Listing installed packages..." && \
+    ls -la node_modules/ | head -20 && \
+    echo "🔍 Checking for tailwindcss..." && \
+    ls -la node_modules/tailwindcss/ && \
+    echo "✅ Tailwindcss found" && \
+    echo "🔨 Building Next.js..." && \
     npm run build && \
-    echo "✅ Build completed successfully"
+    echo "✅ Build successful"
 
 # Copy Python requirements
 WORKDIR /app
@@ -33,10 +36,8 @@ COPY backend/requirements.txt backend/
 COPY blockchain/requirements.txt blockchain/
 
 # Install Python dependencies
-RUN echo "🐍 Installing Python dependencies..." && \
-    pip3 install --no-cache-dir -r backend/requirements.txt && \
-    pip3 install --no-cache-dir -r blockchain/requirements.txt && \
-    echo "✅ Python dependencies installed"
+RUN pip3 install --no-cache-dir -r backend/requirements.txt && \
+    pip3 install --no-cache-dir -r blockchain/requirements.txt
 
 # Copy rest of the application
 COPY backend/ backend/
